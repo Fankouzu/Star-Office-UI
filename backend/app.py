@@ -284,9 +284,27 @@ def load_state():
 
 
 def save_state(state: dict):
-    """Save state to file"""
+    """Save state to file and sync main agent in agents-state.json"""
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
+    # Keep agents-state.json in sync for the main agent
+    _sync_main_agent_state(state)
+
+
+def _sync_main_agent_state(state: dict):
+    """Update the isMain=true entry in agents-state.json to match state.json"""
+    try:
+        agents = load_agents_state()
+        for a in agents:
+            if a.get("isMain"):
+                a["state"] = state.get("state", "idle")
+                a["detail"] = state.get("detail", "")
+                a["updated_at"] = state.get("updated_at", datetime.now().isoformat())
+                a["area"] = state_to_area(a["state"])
+                break
+        save_agents_state(agents)
+    except Exception:
+        pass
 
 
 # Initialize state
