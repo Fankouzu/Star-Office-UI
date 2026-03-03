@@ -208,8 +208,7 @@
             right: -320px;
             width: 320px;
             max-width: 92vw;
-            height: 100dvh;
-            max-height: 100dvh;
+            height: 100vh;
             background: #111827;
             border-left: 2px solid #22c55e;
             box-shadow: -8px 0 24px rgba(0,0,0,0.45);
@@ -217,7 +216,6 @@
             z-index: 1000010;
             display: flex;
             flex-direction: column;
-            overflow: hidden;
         }
         #asset-drawer.open { right: 0; }
         #asset-drawer-header {
@@ -232,14 +230,13 @@
         }
         #asset-drawer-body {
             padding: 10px;
-            overflow: hidden;
+            overflow: auto;
             color: #e5e7eb;
             font-size: 12px;
             position: relative;
             display: flex;
             flex-direction: column;
             min-height: 0;
-            flex: 1 1 auto;
         }
         .asset-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
         .asset-toolbar input { flex:1; min-width: 150px; padding:6px 8px; border-radius:6px; border:1px solid rgba(148, 163, 184, 0.22); background:#1f2937; color:#fff; }
@@ -250,7 +247,7 @@
             flex-direction:column;
             gap:6px;
             flex: 1 1 auto;
-            min-height: 0;
+            min-height: 120px;
             max-height: none;
             overflow-y: auto;
             padding-right: 2px;
@@ -444,18 +441,13 @@
             overflow:hidden;
             pointer-events:none;
             transition:max-height .28s ease, opacity .22s ease, transform .28s ease, margin-top .28s ease;
-            display:flex;
-            flex-direction:column;
-            min-height:0;
         }
         #asset-manual-panel.open {
             margin-top:8px;
-            max-height:none;
-            flex:1 1 auto;
+            max-height:1600px;
             opacity:1;
             transform:translateY(0);
             pointer-events:auto;
-            min-height:0;
         }
         #asset-broker-panel {
             margin-top:0;
@@ -1151,7 +1143,7 @@
                 <div id="asset-auth-msg" class="asset-sub"></div>
             </div>
 
-            <div id="asset-main-content" style="display:none; flex:1; min-height:0;">
+            <div id="asset-main-content" style="display:none;">
                 <div id="asset-move-panel">
                     <div class="asset-toolbar" id="asset-move-row">
                         <button id="btn-move-house" class="btn-move" onclick="generateRpgBackground()">📦 搬新家</button>
@@ -1679,7 +1671,7 @@
             const main = document.getElementById('asset-main-content');
             if (!gate || !main) return;
             gate.style.display = assetDrawerAuthed ? 'none' : 'block';
-            main.style.display = assetDrawerAuthed ? 'flex' : 'none';
+            main.style.display = assetDrawerAuthed ? 'block' : 'none';
             updateManualPanelUI();
         }
 
