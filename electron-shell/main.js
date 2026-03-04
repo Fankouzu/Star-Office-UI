@@ -10,6 +10,7 @@ let miniWindow = null;
 let tray = null;
 let backendChild = null;
 let isQuitting = false;
+let currentUiLang = "en";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -171,6 +172,19 @@ function spawnBackend(projectRoot) {
   return null;
 }
 
+function ensureElectronStandaloneSnapshot(projectRoot) {
+  const src = path.join(projectRoot, "frontend", "index.html");
+  const dst = path.join(projectRoot, "frontend", "electron-standalone.html");
+  if (!fs.existsSync(src)) return;
+  if (fs.existsSync(dst)) return;
+  try {
+    fs.copyFileSync(src, dst);
+    console.log(`created standalone snapshot: ${dst}`);
+  } catch (e) {
+    console.warn(`failed to create standalone snapshot: ${e.message}`);
+  }
+}
+
 function emitMini(event, payload) {
   if (!miniWindow || miniWindow.isDestroyed()) return;
   miniWindow.webContents.send("tauri:event", { event, payload });
@@ -178,7 +192,7 @@ function emitMini(event, payload) {
 
 async function enterMiniMode(projectRoot) {
   const snapshot = await readStateWithFallback(projectRoot).catch(() => null);
-  if (snapshot) emitMini("mini-sync-state", snapshot);
+  if (snapshot) emitMini("mini-sync-state", { ...snapshot, ui_lang: currentUiLang });
 
   if (mainWindow && !mainWindow.isDestroyed()) {
     const bounds = mainWindow.getBounds();
@@ -201,6 +215,7 @@ async function openFrontendAndQuit() {
 function createWindows(projectRoot) {
   const preloadPath = path.join(__dirname, "preload.js");
   const appIconPath = resolveAppIconPath(projectRoot);
+  ensureElectronStandaloneSnapshot(projectRoot);
 
   mainWindow = new BrowserWindow({
     width: 700,
@@ -242,7 +257,7 @@ function createWindows(projectRoot) {
   });
   miniWindow.setTitle("Star Mini");
 
-  const mainUrl = "http://127.0.0.1:18791/?desktop=1";
+  const mainUrl = "http://127.0.0.1:18791/static/electron-standalone.html?desktop=1";
   mainWindow.loadURL(mainUrl);
   miniWindow.loadFile(path.join(projectRoot, "desktop-pet", "src", "minimized.html"));
 }
@@ -309,7 +324,18 @@ function registerIpc(projectRoot) {
     const cmd = payload && payload.command;
     const args = (payload && payload.args) || {};
 
-    if (cmd === "read_state") return readStateWithFallback(projectRoot);
+    if (cmd === "read_state") {
+      const state = await readStateWithFallback(projectRoot);
+      return { ...state, ui_lang: currentUiLang };
+    }
+
+    if (cmd === "set_ui_lang") {
+      const lang = String(args && args.lang ? args.lang : "").toLowerCase();
+      if (lang === "zh" || lang === "en" || lang === "ja") {
+        currentUiLang = lang;
+      }
+      return { ok: true, lang: currentUiLang };
+    }
 
     if (cmd === "enter_minimize_mode") {
       await enterMiniMode(projectRoot);

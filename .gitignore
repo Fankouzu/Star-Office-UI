@@ -28,3 +28,4 @@ frontend/office_bg.png
 runtime-config.json
 assets/bg-history/
 frontend/*.bak
+electron-shell/node_modules/

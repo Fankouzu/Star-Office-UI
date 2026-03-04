@@ -24,6 +24,329 @@
             gap: 10px;
             overflow-x: hidden;
         }
+        /* Electron standalone overrides: replicate desktop-shell styles from pre-upstream version */
+        body.desktop-shell {
+            background: transparent !important;
+            --desktop-game-width: 684px;
+            --desktop-game-height: 384px;
+            padding: 6px 0 8px !important;
+            gap: 8px !important;
+            justify-content: flex-start !important;
+            overflow: hidden !important;
+        }
+        body.desktop-shell #main-stage {
+            width: var(--desktop-game-width) !important;
+        }
+        body.desktop-shell #game-container {
+            width: var(--desktop-game-width) !important;
+            height: var(--desktop-game-height) !important;
+            max-width: var(--desktop-game-width) !important;
+            max-height: var(--desktop-game-height) !important;
+            min-height: var(--desktop-game-height) !important;
+            aspect-ratio: 16 / 9 !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+        }
+        body.desktop-shell #game-container canvas {
+            box-shadow: none !important;
+        }
+        body.desktop-shell #bottom-panels {
+            width: var(--desktop-game-width) !important;
+            max-width: var(--desktop-game-width) !important;
+            flex-direction: row !important;
+            gap: 8px !important;
+            flex-wrap: nowrap !important;
+            align-items: flex-start !important;
+            margin-top: 5px !important;
+        }
+        body.desktop-shell #memo-panel {
+            flex: 1 1 0 !important;
+            width: auto !important;
+            height: 132px !important;
+            padding: 6px 8px 8px !important;
+        }
+        body.desktop-shell #control-bar {
+            flex: 1 1 0 !important;
+            width: auto !important;
+            height: 132px !important;
+            padding: 6px 8px 8px !important;
+            gap: 6px !important;
+        }
+        body.desktop-shell #guest-agent-panel {
+            flex: 1 1 0 !important;
+            width: auto !important;
+            height: 132px !important;
+            padding: 6px 8px 8px !important;
+            gap: 6px !important;
+        }
+        body.desktop-shell #control-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px !important;
+            align-items: stretch;
+            justify-items: stretch;
+        }
+        body.desktop-shell #control-buttons button {
+            height: 34px !important;
+            font-size: 11px !important;
+            padding: 4px 6px !important;
+        }
+        body.desktop-shell #control-bar-title,
+        body.desktop-shell #guest-agent-panel-title,
+        body.desktop-shell #memo-title {
+            font-size: 12px !important;
+        }
+        body.desktop-shell #guest-agent-list {
+            gap: 4px !important;
+        }
+        body.desktop-shell .guest-agent-item {
+            padding: 5px 6px !important;
+            gap: 4px !important;
+        }
+        body.desktop-shell .guest-agent-name {
+            font-size: 11px !important;
+        }
+        body.desktop-shell .guest-agent-buttons button {
+            font-size: 10px !important;
+            padding: 4px 6px !important;
+        }
+        body.desktop-shell #memo-date {
+            font-size: 9px !important;
+            left: -10px !important;
+        }
+        body.desktop-shell #memo-content {
+            font-size: 10px !important;
+            line-height: 1.55 !important;
+            left: 12px !important;
+        }
+        body.desktop-shell .panel-collapsible.collapsed {
+            height: 62px !important;
+            min-height: 62px !important;
+        }
+        body.desktop-shell .panel-collapsible:not(.collapsed) {
+            height: 220px !important;
+            min-height: 220px !important;
+        }
+        body.desktop-shell #status-text {
+            display: none !important;
+        }
+        #status-fab {
+            display: none;
+        }
+        body.desktop-shell #status-fab {
+            display: block;
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000001;
+            max-width: min(62vw, 520px);
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.72);
+            color: #eee;
+            font-size: 12px;
+            line-height: 1.25;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+        }
+        body.desktop-shell #loading-overlay {
+            background: rgba(0, 0, 0, 0.18) !important;
+            backdrop-filter: blur(2px);
+        }
+        body.desktop-shell #pan-toggle,
+        body.desktop-shell #coords-toggle {
+            display: none !important;
+        }
+        #window-controls {
+            display: none;
+        }
+        body.desktop-shell #window-controls {
+            display: flex;
+            position: fixed;
+            top: calc(env(safe-area-inset-top, 0px) + 10px);
+            left: 12px;
+            z-index: 1000002;
+            gap: 8px;
+        }
+        .traffic-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.25) inset;
+            position: relative;
+            transition: transform 0.12s ease, filter 0.16s ease, box-shadow 0.16s ease;
+        }
+        .traffic-btn.close { background: #ff5f57; }
+        .traffic-btn.min { background: #febc2e; }
+        .traffic-btn.max { background: #28c840; opacity: 1; cursor: pointer; }
+        .traffic-btn:disabled { pointer-events: none; }
+        .traffic-btn::before,
+        .traffic-btn::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            background: rgba(53, 53, 53, 0.9);
+            opacity: 0;
+            transition: opacity 0.14s ease;
+            transform-origin: center;
+        }
+        .traffic-btn.close::before,
+        .traffic-btn.close::after {
+            width: 7px;
+            height: 1.4px;
+            margin-left: -3.5px;
+            margin-top: -0.7px;
+            border-radius: 999px;
+            background: rgba(95, 24, 23, 0.95);
+        }
+        .traffic-btn.close::before { transform: rotate(45deg); }
+        .traffic-btn.close::after { transform: rotate(-45deg); }
+        .traffic-btn.min::before {
+            width: 7px;
+            height: 1.4px;
+            margin-left: -3.5px;
+            margin-top: -0.7px;
+            border-radius: 999px;
+            background: rgba(116, 83, 11, 0.95);
+        }
+        .traffic-btn.min::after { display: none; }
+        .traffic-btn.max::before {
+            width: 4px;
+            height: 4px;
+            left: 50%;
+            top: 50%;
+            margin-left: -2.3px;
+            margin-top: -2.3px;
+            background: rgba(28, 86, 38, 0.96);
+            clip-path: polygon(0 0, 100% 0, 0 100%);
+            transform: none;
+        }
+        .traffic-btn.max::after {
+            width: 4px;
+            height: 4px;
+            left: 50%;
+            top: 50%;
+            margin-left: -0.8px;
+            margin-top: -0.8px;
+            background: rgba(28, 86, 38, 0.96);
+            clip-path: polygon(100% 100%, 0 100%, 100% 0);
+            transform: none;
+        }
+        body.desktop-shell #window-controls:hover .traffic-btn::before,
+        body.desktop-shell #window-controls:hover .traffic-btn::after,
+        .traffic-btn:hover::before,
+        .traffic-btn:hover::after {
+            opacity: 1;
+        }
+        .traffic-btn:hover {
+            transform: translateY(-0.5px);
+            filter: saturate(1.03) brightness(1.02);
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.28) inset, 0 0 0 0.5px rgba(255,255,255,0.18);
+        }
+        .traffic-btn:active {
+            transform: translateY(0);
+            filter: brightness(0.94);
+        }
+        body.electron-shell #window-controls {
+            display: flex !important;
+            gap: 7px;
+            top: calc(env(safe-area-inset-top, 0px) + 11px);
+            left: 13px;
+        }
+        body.electron-shell .traffic-btn {
+            width: 12px;
+            height: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.28);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.28) inset,
+                0 0 0 1px rgba(0, 0, 0, 0.06);
+            transform: none;
+        }
+        body.electron-shell .traffic-btn.close {
+            background: radial-gradient(circle at 35% 30%, #ff8a82 0%, #ff5f57 68%);
+        }
+        body.electron-shell .traffic-btn.min {
+            background: radial-gradient(circle at 35% 30%, #ffd76a 0%, #febc2e 68%);
+        }
+        body.electron-shell .traffic-btn.max {
+            background: radial-gradient(circle at 35% 30%, #61e26f 0%, #28c840 68%);
+        }
+        body.electron-shell .traffic-btn.close::before,
+        body.electron-shell .traffic-btn.close::after {
+            background: rgba(77, 18, 17, 0.92);
+            width: 6.5px;
+            height: 1.35px;
+            margin-left: -3.25px;
+            margin-top: -0.67px;
+        }
+        body.electron-shell .traffic-btn.min::before {
+            background: rgba(96, 66, 9, 0.94);
+            width: 6.5px;
+            height: 1.35px;
+            margin-left: -3.25px;
+            margin-top: -0.67px;
+        }
+        body.electron-shell .traffic-btn.max::before {
+            background: rgba(16, 93, 31, 0.95);
+            width: 6.6px;
+            height: 1.35px;
+            margin-left: -3.3px;
+            margin-top: -0.67px;
+            clip-path: none;
+        }
+        body.electron-shell .traffic-btn.max::after {
+            background: rgba(16, 93, 31, 0.95);
+            width: 1.35px;
+            height: 6.6px;
+            margin-left: -0.67px;
+            margin-top: -3.3px;
+            clip-path: none;
+        }
+        body.electron-shell #window-controls .traffic-btn::before,
+        body.electron-shell #window-controls .traffic-btn::after {
+            opacity: 0;
+        }
+        body.electron-shell #window-controls:hover .traffic-btn::before,
+        body.electron-shell #window-controls:hover .traffic-btn::after {
+            opacity: 1;
+        }
+        body.electron-shell .traffic-btn:hover {
+            transform: none;
+            filter: saturate(1.02) brightness(1.015);
+        }
+        body.desktop-shell #lang-toggle-group {
+            top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+            left: auto !important;
+            right: 24px !important;
+            gap: 6px !important;
+        }
+        body.desktop-shell #lang-toggle-group button {
+            min-height: 28px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(0, 0, 0, 0.72);
+            color: #eee;
+            font-family: 'ArkPixel', monospace;
+            font-size: 12px;
+            line-height: 1.25;
+        }
+        body.desktop-shell #lang-toggle-group button.lang-active {
+            background: #141722;
+            color: rgb(246, 208, 6);
+            border-color: rgb(246, 208, 6);
+            box-shadow: 0 0 0 1px rgba(246, 208, 6, 0.45) inset;
+        }
+        body.desktop-shell #asset-drawer {
+            box-shadow: none !important;
+        }
         /* 底部面板容器 */
         #main-stage {
             position: relative;
@@ -115,6 +438,44 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.2;
+        }
+        #office-plaque-dom {
+            position: absolute;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            padding: 6px 12px;
+            border: 2px solid #3e2723;
+            background: #5d4037;
+            color: #ffd700;
+            font-family: 'ArkPixel', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1;
+            text-shadow: 0 1px 0 #000, 0 0 1px #000;
+            z-index: 35;
+            pointer-events: auto;
+            white-space: nowrap;
+            cursor: text;
+        }
+        #office-plaque-text {
+            font-size: 13px;
+            line-height: 1;
+            color: #ffd700;
+            outline: none;
+            min-width: 120px;
+            text-align: center;
+        }
+        #office-plaque-text.editing {
+            padding: 1px 4px;
+            background: rgba(0, 0, 0, 0.28);
+            box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.45) inset;
+        }
+        .office-plaque-star {
+            font-size: 13px;
+            line-height: 1;
         }
         /* 状态控制栏 */
         #control-bar {
@@ -562,6 +923,26 @@
             padding-bottom: 0;
             filter: brightness(0.97);
         }
+        /* Desktop shell: keep 2x2 buttons centered and pressed-state offset visible */
+        body.desktop-shell #control-bar #btn-state-idle,
+        body.desktop-shell #control-bar #btn-state-writing,
+        body.desktop-shell #control-bar #btn-state-syncing,
+        body.desktop-shell #control-bar #btn-state-error {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 40px !important;
+            padding: 0 8px 8px !important;
+            line-height: 1 !important;
+        }
+        body.desktop-shell #control-bar #btn-state-idle:active,
+        body.desktop-shell #control-bar #btn-state-writing:active,
+        body.desktop-shell #control-bar #btn-state-syncing:active,
+        body.desktop-shell #control-bar #btn-state-error:active {
+            padding-top: 5px !important;
+            padding-bottom: 3px !important;
+        }
         /* 装修房间按钮使用像素精灵皮肤 */
         #control-bar #btn-open-drawer {
             background-image: url('/static/btn-open-drawer-sprite.png?v={{VERSION_TIMESTAMP}}') !important;
@@ -835,6 +1216,146 @@
             font-size: 10px;
             flex-shrink: 0;
         }
+        .panel-collapsible {
+            transition: height 0.2s ease, min-height 0.2s ease;
+        }
+        .panel-collapsible.collapsed {
+            height: 48px !important;
+            min-height: 48px !important;
+            overflow: hidden;
+        }
+        .panel-collapsible.collapsed > :not(.panel-toggle-title) {
+            display: none !important;
+        }
+        body.desktop-shell .panel-collapsible {
+            border-radius: 0;
+            border: none !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        body.desktop-shell .panel-toggle-title {
+            height: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0B1117;
+            color: rgb(246, 208, 6) !important;
+            border-radius: 0;
+            border: 2px solid #6f84a2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+            margin: 0;
+            padding: 0 12px;
+            line-height: 1;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            text-shadow: none;
+            transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+        }
+        body.desktop-shell .panel-toggle-title:hover {
+            background: #0B1117;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
+            transform: translateY(-1px);
+        }
+        body.desktop-shell .panel-toggle-title:active {
+            transform: translateY(0);
+        }
+        body.desktop-shell #memo-title,
+        body.desktop-shell #control-bar-title,
+        body.desktop-shell #guest-agent-panel-title {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            height: 44px !important;
+            min-height: 44px !important;
+            margin: 0 !important;
+            padding: 0 12px !important;
+            border: 2px solid #6f84a2 !important;
+            border-bottom: 2px solid #6f84a2 !important;
+            border-radius: 0 !important;
+            background: #0B1117 !important;
+            color: rgb(246, 208, 6) !important;
+            font-size: 13px !important;
+            font-weight: 400 !important;
+            line-height: 1 !important;
+            letter-spacing: 0.5px !important;
+            text-shadow: none !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22) !important;
+            position: relative !important;
+            top: 0 !important;
+            left: 0 !important;
+        }
+        body.desktop-shell .panel-collapsible.collapsed {
+            pointer-events: auto;
+            padding: 6px 8px !important;
+        }
+        body.desktop-shell .panel-collapsible.collapsed .panel-toggle-title {
+            pointer-events: auto;
+            margin: 0;
+        }
+        body.desktop-shell #memo-panel.collapsed::before,
+        body.desktop-shell #memo-panel.collapsed::after,
+        body.desktop-shell #control-bar.collapsed::before,
+        body.desktop-shell #control-bar.collapsed::after,
+        body.desktop-shell #guest-agent-panel.collapsed::before,
+        body.desktop-shell #guest-agent-panel.collapsed::after {
+            display: none !important;
+        }
+        /* memo 展开时只保留底图，不叠加线条装饰 */
+        body.desktop-shell #memo-panel:not(.collapsed)::before,
+        body.desktop-shell #memo-panel:not(.collapsed)::after {
+            display: none !important;
+        }
+        body.desktop-shell .panel-collapsible:not(.collapsed) {
+            padding: 6px 8px 8px !important;
+        }
+        body.desktop-shell #memo-panel:not(.collapsed) {
+            background-image: url('/static/memo-bg.webp?v={{VERSION_TIMESTAMP}}') !important;
+            background-size: contain !important;
+            /* 下移背景图，让主体落在折叠/展开标题条下方 */
+            background-position: center 52px !important;
+            background-repeat: no-repeat !important;
+            min-height: 240px !important;
+            height: 240px !important;
+        }
+        body.desktop-shell #control-bar:not(.collapsed),
+        body.desktop-shell #guest-agent-panel:not(.collapsed) {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+        }
+        body.desktop-shell #guest-agent-list::-webkit-scrollbar-track {
+            background: rgba(250, 244, 207, 0.65);
+        }
+        body.desktop-shell #guest-agent-list::-webkit-scrollbar-thumb {
+            background: rgba(93, 64, 55, 0.55);
+        }
+        body.desktop-shell .guest-agent-item {
+            background: rgba(250, 244, 207, 0.9) !important;
+            border: 1px solid #edd690 !important;
+        }
+        body.desktop-shell .guest-agent-name,
+        body.desktop-shell #guest-agent-panel [style*="color:#cbd5e1"] {
+            color: #5d4037 !important;
+        }
+        body.desktop-shell #control-bar button,
+        body.desktop-shell .guest-agent-buttons button {
+            border: 1px solid #edd690;
+            background: rgba(250, 244, 207, 0.92);
+            color: #5d4037 !important;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body.desktop-shell #control-bar button:hover,
+        body.desktop-shell .guest-agent-buttons button:hover {
+            border-color: #faf4cf;
+            background: rgba(237, 214, 144, 0.96);
+        }
+        .panel-toggle-title {
+            cursor: pointer;
+            user-select: none;
+        }
 
         /* 手机端专属适配（不影响桌面） */
         @media (max-width: 900px), (pointer: coarse) {
@@ -997,6 +1518,12 @@
     </style>
 </head>
 <body>
+    <div id="window-controls">
+        <button id="btn-close" class="traffic-btn close" title="关闭"></button>
+        <button id="btn-minimize-mode" class="traffic-btn min" title="最小化模式"></button>
+        <button id="btn-open-frontend" class="traffic-btn max" title="回到前端界面"></button>
+    </div>
+    <div id="status-fab">加载中...</div>
     <!-- 加载遮罩 -->
     <div id="loading-overlay">
         <div id="loading-text">Loading Star’s pixel office...</div>
@@ -1008,6 +1535,11 @@
     <div id="main-stage">
         <div id="game-container">
             <div id="status-text">加载中...</div>
+            <div id="office-plaque-dom">
+                <span class="office-plaque-star">⭐</span>
+                <span id="office-plaque-text">海辛小龙虾的办公室</span>
+                <span class="office-plaque-star">⭐</span>
+            </div>
         </div>
     
     <!-- 底部面板容器 -->
@@ -1027,10 +1559,10 @@
         <div id="control-bar">
             <div id="control-bar-title">Star 状态</div>
             <div id="control-buttons">
-                <button id="btn-state-idle" onclick="setState('idle','待命')">待命</button>
-                <button id="btn-state-writing" onclick="setState('writing','工作中')">工作</button>
-                <button id="btn-state-syncing" onclick="setState('syncing','同步中')">同步</button>
-                <button id="btn-state-error" onclick="setState('error','报警中')">报警</button>
+                <button id="btn-state-idle" onclick="setState('idle', getStateDetailByState('idle'))">待命</button>
+                <button id="btn-state-writing" onclick="setState('writing', getStateDetailByState('writing'))">工作</button>
+                <button id="btn-state-syncing" onclick="setState('syncing', getStateDetailByState('syncing'))">同步</button>
+                <button id="btn-state-error" onclick="setState('error', getStateDetailByState('error'))">报警</button>
                 <button id="btn-open-drawer" onclick="toggleAssetDrawer()">装修房间</button>
             </div>
         </div>
@@ -1147,16 +1679,18 @@
     <button id="pan-toggle" style="position:fixed; top:calc(env(safe-area-inset-top, 0px) + 12px); left:12px; z-index:999999; padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">
         移动视野
     </button>
-    <div id="lang-toggle-group" style="position:fixed; top:calc(env(safe-area-inset-top, 0px) + 52px); left:12px; z-index:999999; display:flex; gap:2px; align-items:center;">
-        <button id="lang-btn-en" onclick="setUILanguage('en')" style="padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">EN</button>
-        <button id="lang-btn-jp" onclick="setUILanguage('ja')" style="padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">JP</button>
-        <button id="lang-btn-cn" onclick="setUILanguage('zh')" style="padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">CN</button>
+    <div id="lang-toggle-group" style="position:fixed; top:calc(env(safe-area-inset-top, 0px) + 52px); left:12px; z-index:999999; display:flex; align-items:center;">
+        <button id="lang-btn-en" onclick="setUILanguage('en')" style="cursor:pointer;">EN</button>
+        <button id="lang-btn-jp" onclick="setUILanguage('ja')" style="cursor:pointer;">JP</button>
+        <button id="lang-btn-cn" onclick="setUILanguage('zh')" style="cursor:pointer;">CN</button>
     </div>
 
     <script src="/static/vendor/phaser-3.80.1.min.js"></script>
     <script>
         // 简易中英文切换
         let uiLang = localStorage.getItem('uiLang') || 'en';
+        const OFFICE_PLAQUE_STORAGE_KEY = 'officePlaqueTitle';
+        let officePlaqueCustomTitle = (localStorage.getItem(OFFICE_PLAQUE_STORAGE_KEY) || '').trim();
         const I18N = {
             zh: {
                 controlTitle: 'Star 状态',
@@ -1184,7 +1718,13 @@
                 assetHintDefault: '通用素材：建议保持原图尺寸、透明通道与视觉重心一致，避免错位或失真',
                 showCoords: '显示坐标', hideCoords: '隐藏坐标', moveView: '移动视野', lockView: '锁定视野',
                 memoTitle: '昨 日 小 记', guestTitle: '访 客 列 表', officeTitle: '海辛小龙虾的办公室',
-                loadingOffice: '正在加载 Star 的像素办公室...'
+                loadingOffice: '正在加载 Star 的像素办公室...',
+                panelExpand: '展开', panelCollapse: '收起',
+                hiddenTag: '已隐藏', assetListLoaded: '已加载资产', sceneCaptured: '场景抓取', assetListLoadFailed: '资产加载失败，请点“刷新”重试',
+                authNeedInput: '请输入验证码', authPassOk: '验证通过', authPassWrong: '验证码错误',
+                stateDetailIdle: '待命', stateDetailWriting: '整理文档', stateDetailResearching: '搜索信息', stateDetailExecuting: '执行任务', stateDetailSyncing: '同步备份', stateDetailError: '出错了',
+                stateLabelIdle: '待命', stateLabelWriting: '整理文档', stateLabelResearching: '搜索信息', stateLabelExecuting: '执行任务', stateLabelSyncing: '同步备份', stateLabelError: '出错了',
+                statusBrokerDecorating: '正在处理中介装修方案', statusMovingHome: '正在搬新家', statusRestoreHome: '正在回老家', statusRestoreLastBg: '正在回退到上一次背景', statusApplyFavorite: '正在替换收藏地图'
             },
             en: {
                 controlTitle: 'Star Status',
@@ -1212,7 +1752,13 @@
                 assetHintDefault: 'Generic asset: keep source size, alpha channel, and visual anchor to avoid drift/distortion',
                 showCoords: 'Show Coords', hideCoords: 'Hide Coords', moveView: 'Pan View', lockView: 'Lock View',
                 memoTitle: 'YESTERDAY NOTES', guestTitle: 'VISITOR LIST', officeTitle: 'Haixin Lobster Office',
-                loadingOffice: 'Loading Star’s pixel office...'
+                loadingOffice: 'Loading Star’s pixel office...',
+                panelExpand: 'Expand', panelCollapse: 'Collapse',
+                hiddenTag: 'Hidden', assetListLoaded: 'Assets loaded', sceneCaptured: 'Scene captured', assetListLoadFailed: 'Failed to load assets. Click Refresh and retry',
+                authNeedInput: 'Please enter passcode', authPassOk: 'Passcode verified', authPassWrong: 'Wrong passcode',
+                stateDetailIdle: 'Standby', stateDetailWriting: 'Organizing Docs', stateDetailResearching: 'Researching', stateDetailExecuting: 'Executing Tasks', stateDetailSyncing: 'Syncing Backup', stateDetailError: 'Error',
+                stateLabelIdle: 'Standby', stateLabelWriting: 'Organizing Docs', stateLabelResearching: 'Researching', stateLabelExecuting: 'Executing Tasks', stateLabelSyncing: 'Syncing Backup', stateLabelError: 'Error',
+                statusBrokerDecorating: 'Applying broker decoration plan', statusMovingHome: 'Moving to a new home', statusRestoreHome: 'Restoring home background', statusRestoreLastBg: 'Restoring previous generated background', statusApplyFavorite: 'Applying favorite map'
             },
             ja: {
                 controlTitle: 'Star ステータス',
@@ -1240,17 +1786,110 @@
                 assetHintDefault: '汎用素材：元サイズ・透過・視覚アンカーを維持し、ズレや崩れを防いでください',
                 showCoords: '座標表示', hideCoords: '座標非表示', moveView: '視点移動', lockView: '視点固定',
                 memoTitle: '昨日のメモ', guestTitle: '訪問者リスト', officeTitle: 'ハイシン・ロブスターのオフィス',
-                loadingOffice: 'Star のピクセルオフィスを読み込み中...'
+                loadingOffice: 'Star のピクセルオフィスを読み込み中...',
+                panelExpand: '展開', panelCollapse: '折りたたむ',
+                hiddenTag: '非表示', assetListLoaded: 'アセット読み込み', sceneCaptured: 'シーン取得', assetListLoadFailed: 'アセット読み込み失敗。更新して再試行してください',
+                authNeedInput: 'パスコードを入力してください', authPassOk: '認証に成功しました', authPassWrong: 'パスコードが正しくありません',
+                stateDetailIdle: '待機', stateDetailWriting: '文書整理', stateDetailResearching: '情報検索', stateDetailExecuting: 'タスク実行', stateDetailSyncing: '同期バックアップ', stateDetailError: 'エラー発生',
+                stateLabelIdle: '待機', stateLabelWriting: '文書整理', stateLabelResearching: '情報検索', stateLabelExecuting: 'タスク実行', stateLabelSyncing: '同期バックアップ', stateLabelError: 'エラー発生',
+                statusBrokerDecorating: '仲介の装飾プランを処理中', statusMovingHome: '引っ越し中', statusRestoreHome: 'ホーム背景を復元中', statusRestoreLastBg: '前回背景へ復元中', statusApplyFavorite: '保存したマップを適用中'
             }
         };
 
         function t(key) { return (I18N[uiLang] && I18N[uiLang][key]) || key; }
+        function getOfficePlaqueTitle() {
+            return officePlaqueCustomTitle || t('officeTitle');
+        }
+        function refreshOfficePlaqueTitle() {
+            const el = document.getElementById('office-plaque-text');
+            if (!el || el.dataset.editing === '1') return;
+            el.textContent = getOfficePlaqueTitle();
+        }
+        function saveOfficePlaqueTitle(raw) {
+            const next = (raw || '').trim();
+            officePlaqueCustomTitle = next;
+            if (next) localStorage.setItem(OFFICE_PLAQUE_STORAGE_KEY, next);
+            else localStorage.removeItem(OFFICE_PLAQUE_STORAGE_KEY);
+        }
+        function initOfficePlaqueEditor() {
+            const plaque = document.getElementById('office-plaque-dom');
+            const textEl = document.getElementById('office-plaque-text');
+            if (!plaque || !textEl) return;
+
+            const beginEdit = () => {
+                if (textEl.dataset.editing === '1') return;
+                textEl.dataset.editing = '1';
+                textEl.contentEditable = 'true';
+                textEl.spellcheck = false;
+                textEl.classList.add('editing');
+                textEl.focus();
+                const sel = window.getSelection();
+                if (sel) {
+                    const range = document.createRange();
+                    range.selectNodeContents(textEl);
+                    range.collapse(false);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                }
+            };
+
+            const finishEdit = (shouldSave) => {
+                if (textEl.dataset.editing !== '1') return;
+                textEl.contentEditable = 'false';
+                textEl.dataset.editing = '0';
+                textEl.classList.remove('editing');
+                if (shouldSave) saveOfficePlaqueTitle(textEl.textContent || '');
+                refreshOfficePlaqueTitle();
+            };
+
+            plaque.addEventListener('click', () => beginEdit());
+            textEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    finishEdit(true);
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    textEl.textContent = getOfficePlaqueTitle();
+                    finishEdit(false);
+                }
+            });
+            textEl.addEventListener('blur', () => finishEdit(true));
+            refreshOfficePlaqueTitle();
+        }
         function renderBootLoadingText(percent) {
             const loadingEl = document.getElementById('loading-text');
             if (!loadingEl) return;
             const base = t('loadingOffice');
             const p = Number.isFinite(percent) ? ` ${Math.max(0, Math.min(100, Math.round(percent)))}%` : '';
             loadingEl.textContent = `${base}${p}`;
+        }
+
+        function getStateDetailByState(state) {
+            const keyMap = {
+                idle: 'stateDetailIdle',
+                writing: 'stateDetailWriting',
+                researching: 'stateDetailResearching',
+                executing: 'stateDetailExecuting',
+                syncing: 'stateDetailSyncing',
+                error: 'stateDetailError'
+            };
+            return t(keyMap[state] || 'stateDetailIdle');
+        }
+
+        function getStateLabelByState(state) {
+            if (state === 'syncing') return t('stateLabelSyncing');
+            if (state === 'error') return t('stateLabelError');
+            if (state === 'researching') return t('stateLabelResearching');
+            if (state === 'executing') return t('stateLabelExecuting');
+            if (state === 'writing') return t('stateLabelWriting');
+            return t('stateLabelIdle');
+        }
+
+        async function syncDesktopUiLanguage() {
+            if (!DESKTOP_MODE || !window.__TAURI__ || !window.__TAURI__.core) return;
+            try {
+                await window.__TAURI__.core.invoke('set_ui_lang', { lang: uiLang });
+            } catch (_) {}
         }
 
         function ensureMemoBgVisible() {
@@ -1279,9 +1918,7 @@
                 const el = document.getElementById(id);
                 if (!el) return;
                 const active = (uiLang === lang);
-                el.style.background = active ? '#22c55e' : '#333';
-                el.style.borderColor = active ? '#22c55e' : '#333';
-                el.style.color = '#fff';
+                el.classList.toggle('lang-active', active);
             });
 
             const drawerTitle = document.querySelector('#asset-drawer-header span');
@@ -1320,12 +1957,20 @@
             setText('asset-commit-refresh-btn', 'confirmUpload');
 
             const memoTitle = document.getElementById('memo-title');
-            if (memoTitle) memoTitle.textContent = t('memoTitle');
-            const guestTitle = document.getElementById('guest-agent-panel-title');
-            if (guestTitle) guestTitle.textContent = t('guestTitle');
-            if (window.officePlaqueText && window.officePlaqueText.setText) {
-                window.officePlaqueText.setText(t('officeTitle'));
+            if (memoTitle) {
+                memoTitle.textContent = t('memoTitle');
+                memoTitle.dataset.baseTitle = t('memoTitle');
             }
+            const controlTitle = document.getElementById('control-bar-title');
+            if (controlTitle) controlTitle.dataset.baseTitle = t('controlTitle');
+            const guestTitle = document.getElementById('guest-agent-panel-title');
+            if (guestTitle) {
+                guestTitle.textContent = t('guestTitle');
+                guestTitle.dataset.baseTitle = t('guestTitle');
+            }
+            refreshOfficePlaqueTitle();
+
+            refreshCollapsiblePanelTitles();
 
             const coordsBtn = document.getElementById('coords-toggle');
             if (coordsBtn) coordsBtn.textContent = showCoords ? t('hideCoords') : t('showCoords');
@@ -1336,6 +1981,7 @@
             }
             ensureMemoBgVisible();
             renderBootLoadingText(Number(loadingProgressBar?.style?.width?.replace('%','') || 0));
+            syncDesktopUiLanguage();
         }
 
         function setUILanguage(lang) {
@@ -1386,7 +2032,188 @@
             });
         }
 
+        const ELECTRON_MODE = !!window.__ELECTRON__;
+        const DESKTOP_MODE = !!window.__TAURI__ || new URLSearchParams(window.location.search).get('desktop') === '1';
+        if (DESKTOP_MODE) {
+            document.body.classList.add('desktop-shell');
+        }
+        if (ELECTRON_MODE) {
+            document.body.classList.add('electron-shell');
+        }
+
+        function initDesktopWindowDrag() {
+            if (!DESKTOP_MODE || !window.__TAURI__ || !window.__TAURI__.window) return;
+            const appWindow = window.__TAURI__.window.getCurrentWindow();
+            let dragStart = null;
+            let dragTriggered = false;
+            const DRAG_THRESHOLD = 8;
+
+            const shouldIgnoreTarget = (target) => {
+                if (!target || !(target instanceof Element)) return false;
+                return !!target.closest('button, a, input, textarea, select, [contenteditable], [data-no-window-drag]');
+            };
+
+            document.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0) return;
+                if (shouldIgnoreTarget(e.target)) return;
+                dragStart = { x: e.clientX, y: e.clientY };
+                dragTriggered = false;
+            });
+
+            document.addEventListener('pointermove', async (e) => {
+                if (!dragStart || dragTriggered) return;
+                const dx = e.clientX - dragStart.x;
+                const dy = e.clientY - dragStart.y;
+                const moved = Math.hypot(dx, dy);
+                if (moved < DRAG_THRESHOLD) return;
+                dragTriggered = true;
+                try {
+                    await appWindow.startDragging();
+                } catch (_) {
+                    // ignore drag API errors
+                } finally {
+                    dragStart = null;
+                }
+            });
+
+            const clearDrag = () => {
+                dragStart = null;
+                dragTriggered = false;
+            };
+            document.addEventListener('pointerup', clearDrag);
+            document.addEventListener('pointercancel', clearDrag);
+        }
+        initDesktopWindowDrag();
+
+        function initWindowControls() {
+            if (!DESKTOP_MODE || !window.__TAURI__ || !window.__TAURI__.core) return;
+            const core = window.__TAURI__.core;
+            const closeBtn = document.getElementById('btn-close');
+            const miniBtn = document.getElementById('btn-minimize-mode');
+            const maxBtn = document.getElementById('btn-open-frontend');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try { await core.invoke('close_app'); } catch (_) {}
+                });
+            }
+            if (miniBtn) {
+                miniBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try { await core.invoke('enter_minimize_mode'); } catch (_) {}
+                });
+            }
+            if (maxBtn) {
+                maxBtn.addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    try {
+                        const url = new URL('/', window.location.origin).toString();
+                        if (core && core.invoke) {
+                            await core.invoke('open_external_url', { url });
+                            await core.invoke('close_app');
+                        } else {
+                            window.open(url.toString(), '_blank', 'noopener,noreferrer');
+                        }
+                    } catch (_) {
+                        window.open('http://127.0.0.1:18791/', '_blank', 'noopener,noreferrer');
+                    }
+                });
+            }
+        }
+        initWindowControls();
+
+        function refreshCollapsiblePanelTitles() {
+            const defs = [
+                { panelId: 'memo-panel', titleId: 'memo-title' },
+                { panelId: 'control-bar', titleId: 'control-bar-title' },
+                { panelId: 'guest-agent-panel', titleId: 'guest-agent-panel-title' }
+            ];
+            defs.forEach(({ panelId, titleId }) => {
+                const panel = document.getElementById(panelId);
+                const title = document.getElementById(titleId);
+                if (!panel || !title) return;
+                const base = (title.textContent || '').replace(/\s*\[[^\]]+\]\s*$/, '').trim();
+                title.dataset.baseTitle = base;
+                const collapsed = panel.classList.contains('collapsed');
+                title.textContent = `${base} [${collapsed ? t('panelExpand') : t('panelCollapse')}]`;
+            });
+        }
+
+        function initCollapsiblePanels() {
+            const defs = [
+                { panelId: 'memo-panel', titleId: 'memo-title' },
+                { panelId: 'control-bar', titleId: 'control-bar-title' },
+                { panelId: 'guest-agent-panel', titleId: 'guest-agent-panel-title' }
+            ];
+
+            defs.forEach(({ panelId, titleId }) => {
+                const panel = document.getElementById(panelId);
+                const title = document.getElementById(titleId);
+                if (!panel || !title) return;
+
+                const baseTitle = (title.textContent || '').replace(/\s*\[[^\]]+\]\s*$/, '').trim();
+                title.dataset.baseTitle = baseTitle;
+                title.classList.add('panel-toggle-title');
+                panel.classList.add('panel-collapsible');
+
+                const updateTitle = () => {
+                    const collapsed = panel.classList.contains('collapsed');
+                    title.textContent = `${title.dataset.baseTitle} [${collapsed ? t('panelExpand') : t('panelCollapse')}]`;
+                };
+
+                const syncElectronWindowMode = async () => {
+                    if (!ELECTRON_MODE || !window.__TAURI__ || !window.__TAURI__.core) return;
+                    const expanded = !!document.querySelector('.panel-collapsible:not(.collapsed)');
+                    try {
+                        await window.__TAURI__.core.invoke('set_main_window_mode', { expanded });
+                    } catch (_) {}
+                };
+
+                title.addEventListener('click', () => {
+                    panel.classList.toggle('collapsed');
+                    updateTitle();
+                    queueDesktopResize();
+                    syncElectronWindowMode();
+                    setTimeout(queueDesktopResize, 260);
+                    setTimeout(syncElectronWindowMode, 260);
+                });
+
+                panel.classList.add('collapsed');
+                updateTitle();
+                syncElectronWindowMode();
+            });
+        }
+
+        let resizeTimer = null;
+        async function syncDesktopWindowSize() {
+            if (!DESKTOP_MODE || !window.__TAURI__ || !window.__TAURI__.core) return;
+            const expanded = !!document.querySelector('.panel-collapsible:not(.collapsed)');
+            try {
+                await window.__TAURI__.core.invoke('set_main_window_mode', { expanded });
+            } catch (_) {}
+        }
+        function queueDesktopResize() {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { syncDesktopWindowSize(); }, 40);
+        }
+
+        initCollapsiblePanels();
+        queueDesktopResize();
+        window.addEventListener('resize', () => { if (DESKTOP_MODE) queueDesktopResize(); });
+        window.addEventListener('load', () => { if (DESKTOP_MODE) queueDesktopResize(); });
+        if (DESKTOP_MODE && document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(() => {
+                queueDesktopResize();
+                setTimeout(queueDesktopResize, 120);
+            }).catch(() => {});
+        }
+
         const IS_TOUCH_DEVICE = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
+        // Desktop-only fill zoom to crop decorative side bands and make main room occupy more width.
+        const DESKTOP_FILL_ZOOM = 1.14;
 
         const config = {
             type: Phaser.AUTO,
@@ -1611,7 +2438,7 @@
             const msg = document.getElementById('asset-auth-msg');
             const val = (input?.value || '').trim();
             if (!val) {
-                if (msg) msg.textContent = '❌ 请输入验证码';
+                if (msg) msg.textContent = `❌ ${t('authNeedInput')}`;
                 return;
             }
             try {
@@ -1623,13 +2450,13 @@
                 const data = await res.json();
                 if (data && data.ok) {
                     assetDrawerAuthed = true;
-                    if (msg) msg.textContent = '✅ 验证通过';
+                    if (msg) msg.textContent = `✅ ${t('authPassOk')}`;
                     updateAssetAuthUI();
                     await refreshAssetDrawerList();
                     bindDrawerFileMeta();
                 } else {
                     assetDrawerAuthed = false;
-                    if (msg) msg.textContent = '❌ 验证码错误';
+                    if (msg) msg.textContent = `❌ ${t('authPassWrong')}`;
                 }
             } catch (e) {
                 assetDrawerAuthed = false;
@@ -2255,7 +3082,7 @@
             setAssetVisible(p, nextVisible);
             renderAssetDrawerList();
             const out = document.getElementById('asset-upload-result');
-            if (out) out.textContent = nextVisible ? `✅ 已显示：${p}` : `🙈 已隐藏：${p}`;
+            if (out) out.textContent = nextVisible ? `✅ ${t('assetShow')}：${p}` : `🙈 ${t('assetHide')}：${p}`;
             if (selectedAssetInfo && selectedAssetInfo.path === p) {
                 if (!nextVisible) clearAssetSelectionUI();
                 else applyScenePreview(p);
@@ -2313,7 +3140,7 @@
                     <canvas id="${thumbId}" class="asset-thumb" width="56" height="56"></canvas>
                     <div class="asset-meta">
                         <div class="asset-path">${it.path}</div>
-                        <div class="asset-sub">${displayName} ｜ ${reso}${hidden ? ' ｜ 已隐藏' : ''}</div>
+                        <div class="asset-sub">${displayName} ｜ ${reso}${hidden ? ` ｜ ${t('hiddenTag')}` : ''}</div>
                     </div>
                     <button class="asset-vis-btn" onclick="toggleAssetVisibility('${(it.path || '').replace(/'/g, "\\'")}', event)">${visEmoji}</button>
                 </div>`;
@@ -2354,7 +3181,7 @@
                 }
 
                 renderAssetDrawerList();
-                if (out) out.textContent = `已加载资产：${assetListData.length} ｜ 场景抓取：${sceneAssetItems.length}`;
+                if (out) out.textContent = `${t('assetListLoaded')}：${assetListData.length} ｜ ${t('sceneCaptured')}：${sceneAssetItems.length}`;
 
                 if (selectedPath) {
                     updateActiveAssetItem(selectedPath);
@@ -2362,7 +3189,7 @@
                 }
             } catch (e) {
                 console.error('加载资产列表失败', e);
-                if (out) out.textContent = '❌ 资产加载失败，请点“刷新”重试';
+                if (out) out.textContent = `❌ ${t('assetListLoadFailed')}`;
             }
         }
 
@@ -2693,7 +3520,7 @@ function toggleBrokerPanel() {
             try { setState('idle', t('moveSuccess').replace('✅ ', '')); } catch (e) {}
         }
 
-        function setWorkingStatus(detail = '工作中') {
+        function setWorkingStatus(detail = t('stateDetailWriting')) {
             try { setState('writing', detail); } catch (e) {}
         }
 
@@ -2768,7 +3595,7 @@ function toggleBrokerPanel() {
         async function generateCustomRpgBackground() {
             const brokerBtn = document.querySelector('#asset-broker-row .btn-broker');
             flashButtonActive(brokerBtn);
-            setWorkingStatus('正在处理中介装修方案');
+            setWorkingStatus(t('statusBrokerDecorating'));
             const out = document.getElementById('asset-move-result') || document.getElementById('asset-upload-result');
             const prompt = (document.getElementById('asset-broker-prompt')?.value || '').trim();
             if (!prompt) {
@@ -2818,7 +3645,7 @@ function toggleBrokerPanel() {
         async function generateRpgBackground() {
             const moveBtn = document.getElementById('btn-move-house');
             flashButtonActive(moveBtn);
-            setWorkingStatus('正在搬新家');
+            setWorkingStatus(t('statusMovingHome'));
             const out = document.getElementById('asset-move-result') || document.getElementById('asset-upload-result');
             // 点击即刻显示遮罩，先于任何网络调用
             showRoomLoadingOverlay();
@@ -2871,7 +3698,7 @@ function toggleBrokerPanel() {
                 return;
             }
 
-            setWorkingStatus('正在回老家');
+            setWorkingStatus(t('statusRestoreHome'));
             // 点击即刻显示遮罩，先于任何网络调用
             showRoomLoadingOverlay();
             out.textContent = '🏡 正在回老家（恢复初始底图）...';
@@ -2907,7 +3734,7 @@ function toggleBrokerPanel() {
                 return;
             }
 
-            setWorkingStatus('正在回退到上一次背景');
+            setWorkingStatus(t('statusRestoreLastBg'));
             showRoomLoadingOverlay();
             out.textContent = '↩️ 正在回退到最近一次生成底图...';
             try {
@@ -2999,7 +3826,7 @@ function toggleBrokerPanel() {
             const out = document.getElementById('asset-move-result') || document.getElementById('asset-upload-result');
             if (!id) return;
             showRoomLoadingOverlay();
-            setWorkingStatus('正在替换收藏地图');
+            setWorkingStatus(t('statusApplyFavorite'));
             try {
                 const data = await fetchJsonSafe('/assets/home-favorites/apply', {
                     method: 'POST',
@@ -3482,8 +4309,8 @@ function toggleBrokerPanel() {
             const isDemoGuest = (demoVisitor && demoVisitor.isDemo) || (id === 'demo_nika' || id === 'demo_mercury');
             const nameH = (g.nameText && g.nameText.height) ? g.nameText.height : 16;
             const by = isDemoGuest ? (g.sprite.y - 90) : ((g.nameText ? g.nameText.y : (g.sprite.y - 150)) - (nameH / 2) - 22);
-            const fontSize = IS_TOUCH_DEVICE ? 14 : 12;
-            const bg = game.add.rectangle(bx, by, text.length * 10 + 24, 28, 0xffffff, 0.95);
+            const fontSize = IS_TOUCH_DEVICE ? 16 : 14;
+            const bg = game.add.rectangle(bx, by, text.length * 11 + 30, 34, 0xffffff, 0.95);
             bg.setStrokeStyle(2, 0x000000);
             const txt = game.add.text(bx, by, text, { fontFamily: 'ArkPixel, monospace', fontSize: fontSize + 'px', fill: '#000' }).setOrigin(0.5);
             const bubble = game.add.container(0, 0, [bg, txt]);
@@ -3590,8 +4417,8 @@ function toggleBrokerPanel() {
                                 }
                                 const bx = g.sprite.x;
                                 const by = g.sprite.y - 90;
-                                const fontSize = IS_TOUCH_DEVICE ? 14 : 12;
-                                const bg = game.add.rectangle(bx, by, text.length * 10 + 24, 28, 0xffffff, 0.95);
+                                const fontSize = IS_TOUCH_DEVICE ? 16 : 14;
+                                const bg = game.add.rectangle(bx, by, text.length * 11 + 30, 34, 0xffffff, 0.95);
                                 bg.setStrokeStyle(2, 0x000000);
                                 const txt = game.add.text(bx, by, text, { fontFamily: 'ArkPixel, monospace', fontSize: fontSize + 'px', fill: '#000' }).setOrigin(0.5);
                                 const bubble = game.add.container(0, 0, [bg, txt]);
@@ -3689,6 +4516,7 @@ function toggleBrokerPanel() {
             }
             
             console.log('WebP 支持:', supportsWebP);
+            initOfficePlaqueEditor();
             applyLanguage();
             updateSpeedModeUI();
 
@@ -3791,6 +4619,10 @@ function toggleBrokerPanel() {
         function create() {
             game = this;
             officeBgSprite = this.add.image(640, 360, 'office_bg');
+            // Electron standalone: force room background to fill the full 16:9 stage width.
+            if (officeBgSprite && officeBgSprite.setDisplaySize) {
+                officeBgSprite.setDisplaySize(1280, 720);
+            }
 
             // Place furniture: Sofa
             // NOTE: coordinates are interpreted as the TOP-LEFT corner of the sprite
@@ -3841,25 +4673,6 @@ function toggleBrokerPanel() {
             // Sofa stays static when idle (no longer the main idle animation)
             sofa.anims.stop();
             sofa.setTexture('sofa_idle');
-
-            // 加像素风小牌匾：海辛小龙虾的办公室
-            const plaqueX = config.width / 2;
-            const plaqueY = config.height - 36;
-            const plaqueBg = game.add.rectangle(plaqueX, plaqueY, 420, 44, 0x5d4037);
-            plaqueBg.setStrokeStyle(3, 0x3e2723);
-            const plaqueText = game.add.text(plaqueX, plaqueY, t('officeTitle'), {
-                fontFamily: 'ArkPixel, monospace',
-                fontSize: '18px',
-                fill: '#ffd700',
-                fontWeight: '900',
-                fontStyle: 'bold',
-                stroke: '#000',
-                strokeThickness: 3
-            }).setOrigin(0.5);
-            // 牌匾两边加个小装饰（跟随牌匾居中）
-            game.add.text(plaqueX - 190, plaqueY, '⭐', { fontFamily: 'ArkPixel, monospace', fontSize: '20px' }).setOrigin(0.5);
-            game.add.text(plaqueX + 190, plaqueY, '⭐', { fontFamily: 'ArkPixel, monospace', fontSize: '20px' }).setOrigin(0.5);
-            window.officePlaqueText = plaqueText;
 
             // Random plant at (565,178) (frame 0-15, 160x160 each)
             const plantFrameCount = 16;
@@ -4039,6 +4852,9 @@ function toggleBrokerPanel() {
             window.starSprite = star;
 
             statusText = document.getElementById('status-text');
+            if (DESKTOP_MODE) {
+                statusText = document.getElementById('status-fab') || statusText;
+            }
             placeOverlayAndStatusAtCanvasBottomLeft();
             window.addEventListener('resize', placeOverlayAndStatusAtCanvasBottomLeft);
             window.addEventListener('scroll', placeOverlayAndStatusAtCanvasBottomLeft, { passive: true });
@@ -4120,6 +4936,9 @@ function toggleBrokerPanel() {
 
             camera.setBounds(0, 0, MAP_W, MAP_H);
             clampCameraScroll();
+            if (DESKTOP_MODE && !isTouchDevice) {
+                camera.centerOn(MAP_W / 2, MAP_H / 2);
+            }
 
             function setPanEnabled(on) {
                 panEnabled = on;
@@ -4131,7 +4950,7 @@ function toggleBrokerPanel() {
                 game.input.setDefaultCursor(on ? 'grab' : 'default');
                 if (isTouchDevice && statusText) {
                     const info = on ? '视野拖动已开启（可左右拖动画布）' : '视野拖动已关闭（点击左上角“移动视野”可开启）';
-                    statusText.textContent = `状态：[${(STATES[currentState] && STATES[currentState].name) || '待命'}] ${info}`;
+                    statusText.textContent = `[${getStateLabelByState(currentState)}] ${info}`;
                 }
             }
 
@@ -4356,7 +5175,7 @@ function toggleBrokerPanel() {
                     const stateInfo = STATES[nextState] || STATES.idle;
                     // If we're mid-transition, don't restart the path every poll
                     const changed = (pendingDesiredState === null) && (nextState !== currentState);
-                    const nextLine = '[' + stateInfo.name + '] ' + (data.detail || '...');
+                    const nextLine = '[' + getStateLabelByState(nextState) + '] ' + (data.detail || getStateDetailByState(nextState));
                     if (changed) {
                         typewriterTarget = nextLine;
                         typewriterText = '';
@@ -4607,8 +5426,8 @@ function toggleBrokerPanel() {
 
             // 只做手机端稍微调大一点，避免发糊
             const isTouch = IS_TOUCH_DEVICE;
-            const fontSize = isTouch ? 14 : 12;
-            const bg = game.add.rectangle(anchorX, bubbleY, text.length * 10 + 20, 28, 0xffffff, 0.95);
+            const fontSize = isTouch ? 16 : 14;
+            const bg = game.add.rectangle(anchorX, bubbleY, text.length * 11 + 28, 34, 0xffffff, 0.95);
             bg.setStrokeStyle(2, 0x000000);
             const txt = game.add.text(anchorX, bubbleY, text, { fontFamily: 'ArkPixel, monospace', fontSize: fontSize + 'px', fill: '#000', align: 'center' }).setOrigin(0.5);
             bubble = game.add.container(0, 0, [bg, txt]);
@@ -4623,9 +5442,9 @@ function toggleBrokerPanel() {
             const text = texts[Math.floor(Math.random() * texts.length)];
             const anchorX = window.catSprite.x;
             const anchorY = window.catSprite.y - 60;
-            const bg = game.add.rectangle(anchorX, anchorY, text.length * 10 + 20, 24, 0xfffbeb, 0.95);
+            const bg = game.add.rectangle(anchorX, anchorY, text.length * 11 + 24, 28, 0xfffbeb, 0.95);
             bg.setStrokeStyle(2, 0xd4a574);
-            const txt = game.add.text(anchorX, anchorY, text, { fontFamily: 'ArkPixel, monospace', fontSize: '11px', fill: '#8b6914', align: 'center' }).setOrigin(0.5);
+            const txt = game.add.text(anchorX, anchorY, text, { fontFamily: 'ArkPixel, monospace', fontSize: '13px', fill: '#8b6914', align: 'center' }).setOrigin(0.5);
             window.catBubble = game.add.container(0, 0, [bg, txt]);
             window.catBubble.setDepth(2100); // top layer above cat
             setTimeout(() => { if (window.catBubble) { window.catBubble.destroy(); window.catBubble = null; } }, 4000);
