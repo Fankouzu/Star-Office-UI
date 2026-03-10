@@ -923,13 +923,17 @@
             font-size: 12px;
             line-height: 1.8;
             white-space: pre-wrap;
-            word-wrap: break-word;
             overflow-y: auto;
-            flex-grow: 1;
-            padding-right: 4px;
+            flex: 1 1 auto;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+            padding-right: 140px;
             position: relative;
-            left: 100px; /* move content right by 100px */
+            left: 100px;
             top: -10px;
+            overflow-wrap: anywhere;
+            word-break: break-word;
         }
         #memo-content::-webkit-scrollbar {
             width: 6px;
@@ -1281,6 +1285,28 @@
     <button id="pan-toggle" style="position:fixed; top:calc(env(safe-area-inset-top, 0px) + 12px); left:12px; z-index:999999; padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">
         移动视野
     </button>
+    <div id="asset-debug-panel" style="display:none; position:fixed; top:calc(env(safe-area-inset-top, 0px) + 92px); right:12px; width:300px; max-width:calc(100vw - 24px); z-index:1000001; background:rgba(11,17,23,0.96); color:#f8fafc; border:2px solid #6f84a2; border-radius:8px; padding:10px 12px; font-family:ArkPixel, monospace; box-shadow:0 10px 24px rgba(0,0,0,.35);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:13px; color:#f6d006;">素材位置调试</strong>
+            <button id="asset-debug-close" style="padding:2px 6px; cursor:pointer; border:1px solid #475569; background:#1e293b; color:#fff; border-radius:4px;">×</button>
+        </div>
+        <div style="font-size:11px; line-height:1.5; color:#cbd5e1; margin-bottom:8px;">选择一个素材，用滑块调 X / Y / Scale。结果写入 cookie，并在页面加载阶段优先覆盖默认位置，避免渲染后突然跳动。</div>
+        <label style="display:block; font-size:11px; margin:6px 0 2px;">素材</label>
+        <select id="asset-debug-select" style="width:100%; padding:8px; font-family:ArkPixel, monospace; border:1px solid #475569; border-radius:4px; background:#0f172a; color:#fff;"></select>
+        <div id="asset-debug-info" style="font-size:11px; color:#93c5fd; margin:8px 0 6px;"></div>
+        <label style="display:block; font-size:11px; margin:6px 0 2px;">X <span id="asset-debug-x-value"></span></label>
+        <input id="asset-debug-x" type="range" min="0" max="1280" step="1" style="width:100%;">
+        <label style="display:block; font-size:11px; margin:6px 0 2px;">Y <span id="asset-debug-y-value"></span></label>
+        <input id="asset-debug-y" type="range" min="0" max="720" step="1" style="width:100%;">
+        <label style="display:block; font-size:11px; margin:6px 0 2px;">Scale <span id="asset-debug-scale-value"></span></label>
+        <input id="asset-debug-scale" type="range" min="0.05" max="3" step="0.01" style="width:100%;">
+        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+            <button id="asset-debug-reset" style="flex:1; min-width:74px; padding:6px 8px; cursor:pointer; border:1px solid #475569; background:#1e293b; color:#fff; border-radius:4px;">重置当前</button>
+            <button id="asset-debug-clear" style="flex:1; min-width:74px; padding:6px 8px; cursor:pointer; border:1px solid #475569; background:#7f1d1d; color:#fff; border-radius:4px;">清空全部</button>
+            <button id="asset-debug-copy" style="flex:1; min-width:74px; padding:6px 8px; cursor:pointer; border:1px solid #475569; background:#14532d; color:#fff; border-radius:4px;">复制结果</button>
+        </div>
+        <pre id="asset-debug-output" style="margin:10px 0 0; padding:8px; background:#020617; color:#93c5fd; border-radius:4px; font-size:11px; line-height:1.5; white-space:pre-wrap; word-break:break-word;"></pre>
+    </div>
     <div id="lang-toggle-group" style="position:fixed; top:calc(env(safe-area-inset-top, 0px) + 52px); left:12px; z-index:1000002; display:flex; gap:2px; align-items:center;">
         <button id="lang-btn-en" onclick="setUILanguage('en')" style="padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">EN</button>
         <button id="lang-btn-jp" onclick="setUILanguage('ja')" style="padding:8px 10px; font-family:ArkPixel,monospace; font-size:13px; cursor:pointer; border:2px solid #333; border-radius:5px; background:#333; color:#fff;">JP</button>
@@ -1654,9 +1680,9 @@
         let game, star, sofa, serverroom, officeBgSprite, areas = {}, currentState = 'idle', pendingDesiredState = null, statusText, lastFetch = 0, lastBlink = 0, lastBubble = 0, targetX = 660, targetY = 170, bubble = null, typewriterText = '', typewriterTarget = '', typewriterIndex = 0, lastTypewriter = 0, syncAnimSprite = null, syncAnimPlayable = false, catBubble = null, selectionBoxGraphics = null;
         const IDLE_SOFA_ANCHOR = { x: 798, y: 272 }; // 统一中心锚点（原 sofa 左上 670,144 的中心）
         const IDLE_STAR_SCALE = 1.0; // star idle 改为256帧原生显示，不再放大
-        // flowers 精灵表规格：固定单帧 128x128，4x4
-        let FLOWERS_FRAME_W = 65;
-        let FLOWERS_FRAME_H = 65;
+        // flowers 精灵表规格：512x512 的 4x4，单帧固定 128x128
+        let FLOWERS_FRAME_W = 128;
+        let FLOWERS_FRAME_H = 128;
         let FLOWERS_FRAME_COLS = 4;
         let FLOWERS_FRAME_ROWS = 4;
         let currentOfficeBgTextureKey = 'office_bg';
@@ -1704,6 +1730,20 @@
 
         let coordsOverlay, coordsDisplay, coordsToggle;
         let showCoords = false;
+        let assetDebugEnabled = new URLSearchParams(window.location.search).get('assetDebug') === '1' || new URLSearchParams(window.location.search).get('flowerDebug') === '1';
+        const ASSET_DEBUG_COOKIE = 'starOfficeAssetDebug';
+        const DEBUG_ASSET_DEFAULTS = {
+            flower: { label: '花瓶', path: 'frontend/flowers-bloom-v2.webp', x: 310, y: 390, scale: 0.8 },
+            cat: { label: '猫', path: 'frontend/cats-spritesheet.webp', x: 94, y: 557, scale: 1 },
+            plant1: { label: '植物 1', path: 'frontend/plants-spritesheet.webp', x: 565, y: 178, scale: 1 },
+            plant2: { label: '植物 2', path: 'frontend/plants-spritesheet.webp', x: 230, y: 185, scale: 1 },
+            plant3: { label: '植物 3', path: 'frontend/plants-spritesheet.webp', x: 977, y: 496, scale: 1 },
+            poster: { label: '海报', path: 'frontend/posters-spritesheet.webp', x: 252, y: 66, scale: 1 },
+        };
+        let assetDebugOverrides = {};
+        let assetDebugSprites = {};
+        let assetDebugSelectedId = 'flower';
+        let assetDebugGraphics = null;
         let guestAgents = [];
         let guestSprites = {}; // agentId -> {sprite, nameText}
         let guestBubbles = {}; // agentId -> bubble container
@@ -1722,6 +1762,216 @@
         const TYPEWRITER_DELAY = 50;
         let lastSeenGuestIds = new Set(); // 用于检测新加入的访客，触发欢迎气泡
         let guestWelcomeInitialized = false;
+
+        function parseAssetDebugCookie() {
+            try {
+                const parts = document.cookie ? document.cookie.split('; ') : [];
+                for (const part of parts) {
+                    const idx = part.indexOf('=');
+                    if (idx === -1) continue;
+                    const key = part.slice(0, idx);
+                    const value = part.slice(idx + 1);
+                    if (key === ASSET_DEBUG_COOKIE) return JSON.parse(decodeURIComponent(value || ''));
+                }
+            } catch (e) {
+                console.warn('parseAssetDebugCookie failed', e);
+            }
+            return {};
+        }
+
+        function saveAssetDebugCookie() {
+            try {
+                const value = encodeURIComponent(JSON.stringify(assetDebugOverrides));
+                document.cookie = `${ASSET_DEBUG_COOKIE}=${value}; path=/; max-age=31536000; SameSite=Lax`;
+            } catch (e) {
+                console.warn('saveAssetDebugCookie failed', e);
+            }
+        }
+
+        function clearAssetDebugCookie() {
+            document.cookie = `${ASSET_DEBUG_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+        }
+
+        function getAssetDebugPlacement(id) {
+            const base = DEBUG_ASSET_DEFAULTS[id] || { x: 0, y: 0, scale: 1 };
+            const ov = assetDebugOverrides[id] || {};
+            return {
+                x: Number.isFinite(Number(ov.x)) ? Number(ov.x) : base.x,
+                y: Number.isFinite(Number(ov.y)) ? Number(ov.y) : base.y,
+                scale: Number.isFinite(Number(ov.scale)) && Number(ov.scale) > 0 ? Number(ov.scale) : base.scale,
+            };
+        }
+
+        function setAssetDebugPlacement(id, patch) {
+            assetDebugOverrides[id] = {
+                ...getAssetDebugPlacement(id),
+                ...patch,
+            };
+            saveAssetDebugCookie();
+        }
+
+        function resetAssetDebugPlacement(id) {
+            delete assetDebugOverrides[id];
+            saveAssetDebugCookie();
+        }
+
+        assetDebugOverrides = parseAssetDebugCookie();
+
+        function registerAssetDebugSprite(id, sprite) {
+            if (!id || !sprite) return;
+            assetDebugSprites[id] = sprite;
+            if (assetDebugEnabled && assetDebugSelectedId === id) refreshAssetDebugPanel();
+        }
+
+        function refreshAssetDebugOverlay() {
+            if (!assetDebugEnabled) return;
+            const scene = getCurrentScene();
+            const sprite = assetDebugSprites[assetDebugSelectedId];
+            if (!scene || !sprite || !sprite.getBounds) {
+                if (assetDebugGraphics) assetDebugGraphics.setVisible(false);
+                return;
+            }
+            if (!assetDebugGraphics) assetDebugGraphics = scene.add.graphics();
+            const b = sprite.getBounds();
+            assetDebugGraphics.clear();
+            assetDebugGraphics.lineStyle(2, 0xff4d6d, 1);
+            assetDebugGraphics.strokeRect(b.x, b.y, b.width, b.height);
+            assetDebugGraphics.setDepth(99999);
+            assetDebugGraphics.setVisible(true);
+        }
+
+        function getAssetDebugOutput() {
+            const out = {};
+            for (const id of Object.keys(DEBUG_ASSET_DEFAULTS)) {
+                out[id] = getAssetDebugPlacement(id);
+            }
+            return JSON.stringify(out, null, 2);
+        }
+
+        function refreshAssetDebugPanel() {
+            const sprite = assetDebugSprites[assetDebugSelectedId];
+            const info = DEBUG_ASSET_DEFAULTS[assetDebugSelectedId];
+            const cfg = getAssetDebugPlacement(assetDebugSelectedId);
+            const xVal = document.getElementById('asset-debug-x-value');
+            const yVal = document.getElementById('asset-debug-y-value');
+            const scaleVal = document.getElementById('asset-debug-scale-value');
+            const xInput = document.getElementById('asset-debug-x');
+            const yInput = document.getElementById('asset-debug-y');
+            const scaleInput = document.getElementById('asset-debug-scale');
+            const infoBox = document.getElementById('asset-debug-info');
+            const output = document.getElementById('asset-debug-output');
+            if (xVal) xVal.textContent = Math.round(cfg.x);
+            if (yVal) yVal.textContent = Math.round(cfg.y);
+            if (scaleVal) scaleVal.textContent = Number(cfg.scale).toFixed(2);
+            if (xInput) xInput.value = cfg.x;
+            if (yInput) yInput.value = cfg.y;
+            if (scaleInput) scaleInput.value = cfg.scale;
+            if (infoBox) infoBox.textContent = `${info?.label || assetDebugSelectedId} · ${info?.path || ''}` + (sprite ? ` · 当前显示 ${Math.round(sprite.displayWidth)} × ${Math.round(sprite.displayHeight)}` : '');
+            if (output) output.textContent = getAssetDebugOutput();
+            refreshAssetDebugOverlay();
+        }
+
+        function applyAssetDebugPlacement(id) {
+            const sprite = assetDebugSprites[id];
+            if (!sprite) return;
+            const cfg = getAssetDebugPlacement(id);
+            sprite.setPosition(cfg.x, cfg.y);
+            if (sprite.setScale) sprite.setScale(cfg.scale);
+            if (assetDebugSelectedId === id) refreshAssetDebugPanel();
+        }
+
+        function initAssetDebugPanel() {
+            const panel = document.getElementById('asset-debug-panel');
+            if (!panel || !assetDebugEnabled) return;
+            panel.style.display = 'block';
+            const select = document.getElementById('asset-debug-select');
+            if (select && !select.dataset.bound) {
+                select.dataset.bound = '1';
+                select.innerHTML = Object.entries(DEBUG_ASSET_DEFAULTS)
+                    .map(([id, meta]) => `<option value="${id}">${meta.label}</option>`)
+                    .join('');
+                select.value = assetDebugSelectedId;
+                select.addEventListener('change', () => {
+                    assetDebugSelectedId = select.value;
+                    refreshAssetDebugPanel();
+                });
+            }
+
+            const bindRange = (id, key) => {
+                const el = document.getElementById(id);
+                if (!el || el.dataset.bound) return;
+                el.dataset.bound = '1';
+                el.addEventListener('input', () => {
+                    const value = key === 'scale' ? Number(el.value) : Number(el.value);
+                    setAssetDebugPlacement(assetDebugSelectedId, { [key]: value });
+                    applyAssetDebugPlacement(assetDebugSelectedId);
+                });
+            };
+            bindRange('asset-debug-x', 'x');
+            bindRange('asset-debug-y', 'y');
+            bindRange('asset-debug-scale', 'scale');
+
+            const closeBtn = document.getElementById('asset-debug-close');
+            if (closeBtn && !closeBtn.dataset.bound) {
+                closeBtn.dataset.bound = '1';
+                closeBtn.addEventListener('click', () => panel.style.display = 'none');
+            }
+            const resetBtn = document.getElementById('asset-debug-reset');
+            if (resetBtn && !resetBtn.dataset.bound) {
+                resetBtn.dataset.bound = '1';
+                resetBtn.addEventListener('click', () => {
+                    resetAssetDebugPlacement(assetDebugSelectedId);
+                    applyAssetDebugPlacement(assetDebugSelectedId);
+                });
+            }
+            const clearBtn = document.getElementById('asset-debug-clear');
+            if (clearBtn && !clearBtn.dataset.bound) {
+                clearBtn.dataset.bound = '1';
+                clearBtn.addEventListener('click', () => {
+                    assetDebugOverrides = {};
+                    clearAssetDebugCookie();
+                    for (const id of Object.keys(assetDebugSprites)) applyAssetDebugPlacement(id);
+                    refreshAssetDebugPanel();
+                });
+            }
+            const copyBtn = document.getElementById('asset-debug-copy');
+            if (copyBtn && !copyBtn.dataset.bound) {
+                copyBtn.dataset.bound = '1';
+                copyBtn.addEventListener('click', async () => {
+                    const text = getAssetDebugOutput();
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        copyBtn.textContent = '已复制';
+                        setTimeout(() => copyBtn.textContent = '复制结果', 1200);
+                    } catch (e) {
+                        window.prompt('复制下面这段结果：', text);
+                    }
+                });
+            }
+
+            if (!window.__assetDebugKeyHandlerBound) {
+                window.__assetDebugKeyHandlerBound = true;
+                window.addEventListener('keydown', (e) => {
+                    if (!assetDebugEnabled || !assetDebugSprites[assetDebugSelectedId]) return;
+                    const step = e.shiftKey ? 10 : 1;
+                    let cfg = getAssetDebugPlacement(assetDebugSelectedId);
+                    let changed = false;
+                    if (e.key === 'ArrowLeft') { cfg.x -= step; changed = true; }
+                    if (e.key === 'ArrowRight') { cfg.x += step; changed = true; }
+                    if (e.key === 'ArrowUp') { cfg.y -= step; changed = true; }
+                    if (e.key === 'ArrowDown') { cfg.y += step; changed = true; }
+                    if (e.key === '[') { cfg.scale = Math.max(0.05, Number(cfg.scale) - 0.01 * step); changed = true; }
+                    if (e.key === ']') { cfg.scale = Math.min(3, Number(cfg.scale) + 0.01 * step); changed = true; }
+                    if (changed) {
+                        e.preventDefault();
+                        setAssetDebugPlacement(assetDebugSelectedId, cfg);
+                        applyAssetDebugPlacement(assetDebugSelectedId);
+                    }
+                });
+            }
+
+            refreshAssetDebugPanel();
+        }
 
         // 状态控制栏函数（用于测试）
         function setState(state, detail) {
@@ -3939,7 +4189,7 @@ function toggleBrokerPanel() {
                         }
                     }
                 } catch (e) {
-                    console.warn('flowers 规格探测失败，使用默认 65x65', e);
+                    console.warn('flowers 规格探测失败，使用默认 128x128', e);
                 }
 
                 // Only fetch /assets/positions and /assets/defaults when user is authed,
@@ -4104,12 +4354,15 @@ function toggleBrokerPanel() {
             // Random plant at (565,178) (frame 0-15, 160x160 each)
             const plantFrameCount = 16;
             const randomPlantFrame = Math.floor(Math.random() * plantFrameCount);
-            const plant = game.add.sprite(565, 178, 'plants', randomPlantFrame).setOrigin(0.5);
+            const plantCfg = getAssetDebugPlacement('plant1');
+            const plant = game.add.sprite(plantCfg.x, plantCfg.y, 'plants', randomPlantFrame).setOrigin(0.5);
+            plant.setScale(plantCfg.scale);
             plant.setDepth(5);
             plant.setInteractive({ useHandCursor: true });
             // Expose to global for click handler
             window.plantSprite = plant;
             window.plantFrameCount = plantFrameCount;
+            registerAssetDebugSprite('plant1', plant);
             
             plant.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.plantFrameCount);
@@ -4118,11 +4371,14 @@ function toggleBrokerPanel() {
 
             // Random plant at (230,185) (frame 0-15, 160x160 each)
             const plant2Frame = Math.floor(Math.random() * plantFrameCount);
-            const plant2 = game.add.sprite(230, 185, 'plants', plant2Frame).setOrigin(0.5);
+            const plant2Cfg = getAssetDebugPlacement('plant2');
+            const plant2 = game.add.sprite(plant2Cfg.x, plant2Cfg.y, 'plants', plant2Frame).setOrigin(0.5);
+            plant2.setScale(plant2Cfg.scale);
             plant2.setDepth(5);
             plant2.setInteractive({ useHandCursor: true });
             // Expose to global for click handler
             window.plantSprite2 = plant2;
+            registerAssetDebugSprite('plant2', plant2);
             
             plant2.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.plantFrameCount);
@@ -4131,11 +4387,14 @@ function toggleBrokerPanel() {
 
             // Random plant at (977,496) (frame 0-15, 160x160 each)
             const plant3Frame = Math.floor(Math.random() * plantFrameCount);
-            const plant3 = game.add.sprite(977, 496, 'plants', plant3Frame).setOrigin(0.5);
+            const plant3Cfg = getAssetDebugPlacement('plant3');
+            const plant3 = game.add.sprite(plant3Cfg.x, plant3Cfg.y, 'plants', plant3Frame).setOrigin(0.5);
+            plant3.setScale(plant3Cfg.scale);
             plant3.setDepth(5);
             plant3.setInteractive({ useHandCursor: true });
             // Expose to global for click handler
             window.plantSprite3 = plant3;
+            registerAssetDebugSprite('plant3', plant3);
             
             plant3.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.plantFrameCount);
@@ -4145,12 +4404,15 @@ function toggleBrokerPanel() {
             // Random poster at (252,66) (random frame from spritesheet)
             const postersFrameCount = (this.textures.get('posters')?.frameTotal || 1) - 1;
             const randomPosterFrame = Math.floor(Math.random() * Math.max(1, postersFrameCount));
-            const poster = game.add.sprite(252, 66, 'posters', randomPosterFrame).setOrigin(0.5);
+            const posterCfg = getAssetDebugPlacement('poster');
+            const poster = game.add.sprite(posterCfg.x, posterCfg.y, 'posters', randomPosterFrame).setOrigin(0.5);
+            poster.setScale(posterCfg.scale);
             poster.setDepth(4);
             poster.setInteractive({ useHandCursor: true });
             // Expose to global for click handler
             window.posterSprite = poster;
             window.posterFrameCount = postersFrameCount;
+            registerAssetDebugSprite('poster', poster);
             
             poster.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.posterFrameCount);
@@ -4160,12 +4422,15 @@ function toggleBrokerPanel() {
             // Random cat at (94,557)
             const catsFrameCount = (this.textures.get('cats')?.frameTotal || 1) - 1;
             const randomCatFrame = Math.floor(Math.random() * Math.max(1, catsFrameCount));
-            const cat = game.add.sprite(94, 557, 'cats', randomCatFrame).setOrigin(0.5);
+            const catCfg = getAssetDebugPlacement('cat');
+            const cat = game.add.sprite(catCfg.x, catCfg.y, 'cats', randomCatFrame).setOrigin(0.5);
+            cat.setScale(catCfg.scale);
             cat.setDepth(2000); // top layer
             cat.setInteractive({ useHandCursor: true });
             // Expose to global for click handler
             window.catSprite = cat;
             window.catsFrameCount = catsFrameCount;
+            registerAssetDebugSprite('cat', cat);
             cat.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.catsFrameCount);
                 window.catSprite.setFrame(next);
@@ -4209,16 +4474,19 @@ function toggleBrokerPanel() {
             // Random flower pot at (310,390), default scale 0.8 (top layer)
             const flowerFrameCount = Math.max(1, FLOWERS_FRAME_COLS * FLOWERS_FRAME_ROWS); // 动态帧数
             const randomFlowerFrame = Math.floor(Math.random() * flowerFrameCount);
-            const flower = this.add.sprite(310, 390, 'flowers', randomFlowerFrame).setOrigin(0.5);
-            flower.setScale(0.8);
+            const flowerCfg = getAssetDebugPlacement('flower');
+            const flower = this.add.sprite(flowerCfg.x, flowerCfg.y, 'flowers', randomFlowerFrame).setOrigin(0.5);
+            flower.setScale(flowerCfg.scale);
             flower.setDepth(1100); // highest among desk/starWorking
             flower.setInteractive({ useHandCursor: true });
             window.flowerSprite = flower;
             window.flowerFrameCount = flowerFrameCount;
+            registerAssetDebugSprite('flower', flower);
             flower.on('pointerdown', () => {
                 const next = Math.floor(Math.random() * window.flowerFrameCount);
                 window.flowerSprite.setFrame(next);
             });
+            initAssetDebugPanel();
 
             // Star working at desk (217,333)
             this.anims.create({
