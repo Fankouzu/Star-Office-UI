@@ -7,7 +7,6 @@ Reads and sanitizes daily memo content from memory/*.md for the yesterday-memo A
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-import random
 import re
 
 
@@ -31,86 +30,174 @@ def sanitize_content(text: str) -> str:
 
 
 def extract_memo_from_file(file_path: str) -> str:
-    """Extract display-safe memo text from a memory markdown file; sanitizes and truncates with a short fallback."""
+    """Extract a compact, display-safe summary from a daily memory markdown file."""
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        # 提取真实内容，不做过度包装
         lines = content.strip().split("\n")
 
-        # 提取核心要点
-        core_points = []
-        for line in lines:
-            line = line.strip()
-            if not line:
+        noise_patterns = [
+            r"^\*\*Session Key\*\*:",
+            r"^\*\*Session ID\*\*:",
+            r"^\*\*Source\*\*:",
+            r"^user:",
+            r"^sender:",
+            r"^Conversation info",
+            r"^Sender \(untrusted metadata\):",
+            r'^"message_id":',
+            r'^"sender_id":',
+            r'^"timestamp":',
+            r'^"sender":',
+            r'^"label":',
+            r'^"id":',
+            r'^"name":',
+            r'^"username":',
+            r'^https?://',
+            r'^```',
+            r'^[\{\}\[\],]+$',
+        ]
+
+        def is_noise(line: str) -> bool:
+            s = line.strip()
+            if not s:
+                return True
+            if s.startswith("# Session:"):
+                return True
+            for p in noise_patterns:
+                if re.match(p, s, re.IGNORECASE):
+                    return True
+            return False
+
+        def normalize_text(text: str) -> str:
+            text = text.strip()
+            text = re.sub(r"^\[\[.*?\]\]\s*", "", text)
+            text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+            text = re.sub(r"`([^`]+)`", r"\1", text)
+            text = re.sub(r"\s+", " ", text)
+            text = sanitize_content(text)
+            return text.strip(" ：:;；，,。.!！?？")
+
+        def seems_meta(text: str) -> bool:
+            bad_keywords = [
+                "如果你要",
+                "如果你愿意",
+                "我可以继续",
+                "说明一下",
+                "当前拿到的是",
+                "正文全文没有",
+                "你回我一句",
+                "你一句话",
+            ]
+            return any(k in text for k in bad_keywords)
+
+        assistant_lines = []
+        bullet_points = []
+        section_lines: dict[str, list[str]] = {}
+        current_section = ""
+
+        for raw in lines:
+            line = raw.strip()
+
+            if line.startswith("## "):
+                current_section = normalize_text(line[3:])
+                section_lines.setdefault(current_section, [])
+                continue
+
+            if line.startswith("assistant:"):
+                line = normalize_text(line[len("assistant:"):].strip())
+                if line and not is_noise(line) and len(line) >= 12:
+                    assistant_lines.append(line)
+                continue
+
+            if is_noise(line):
                 continue
             if line.startswith("#"):
                 continue
             if line.startswith("- "):
-                core_points.append(line[2:].strip())
-            elif len(line) > 10:
-                core_points.append(line)
-
-        if not core_points:
-            return "「昨日无事记录」\n\n若有恒，何必三更眠五更起；最无益，莫过一日曝十日寒。"
-
-        # 从核心内容中提取 2-3 个关键点
-        selected_points = core_points[:3]
-
-        # 睿智语录库
-        wisdom_quotes = [
-            "「工欲善其事，必先利其器。」",
-            "「不积跬步，无以至千里；不积小流，无以成江海。」",
-            "「知行合一，方可致远。」",
-            "「业精于勤，荒于嬉；行成于思，毁于随。」",
-            "「路漫漫其修远兮，吾将上下而求索。」",
-            "「昨夜西风凋碧树，独上高楼，望尽天涯路。」",
-            "「衣带渐宽终不悔，为伊消得人憔悴。」",
-            "「众里寻他千百度，蓦然回首，那人却在，灯火阑珊处。」",
-            "「世事洞明皆学问，人情练达即文章。」",
-            "「纸上得来终觉浅，绝知此事要躬行。」"
-        ]
-
-        quote = random.choice(wisdom_quotes)
-
-        # 组合内容
-        result = []
-
-        # 添加核心内容
-        if selected_points:
-            for point in selected_points:
-                # 隐私清理
-                point = sanitize_content(point)
-                # 截断过长的内容
-                if len(point) > 40:
-                    point = point[:37] + "..."
-                # 每行最多 20 字
-                if len(point) <= 20:
-                    result.append(f"· {point}")
-                else:
-                    # 按 20 字切分
-                    for j in range(0, len(point), 20):
-                        chunk = point[j:j+20]
-                        if j == 0:
-                            result.append(f"· {chunk}")
-                        else:
-                            result.append(f"  {chunk}")
-
-        # 添加睿智语录
-        if quote:
-            if len(quote) <= 20:
-                result.append(f"\n{quote}")
+                point = normalize_text(line[2:].strip())
+                if point and not seems_meta(point):
+                    bullet_points.append(point)
+                    if current_section:
+                        section_lines.setdefault(current_section, []).append(point)
             else:
-                for j in range(0, len(quote), 20):
-                    chunk = quote[j:j+20]
-                    if j == 0:
-                        result.append(f"\n{chunk}")
-                    else:
-                        result.append(chunk)
+                point = normalize_text(line)
+                if point and len(point) >= 12 and not seems_meta(point):
+                    bullet_points.append(point)
+                    if current_section:
+                        section_lines.setdefault(current_section, []).append(point)
+
+        def score_summary(text: str) -> int:
+            score = 0
+            if any(k in text for k in ["总结", "摘要", "核心", "本质", "重点", "实现"]):
+                score += 4
+            if any(k in text for k in ["好了", "本质上", "这篇文章", "主要是", "核心摘要"]):
+                score += 3
+            if any(k in text for k in ["我先把", "我把", "继续扒", "读完给你", "先给你"]):
+                score -= 3
+            score -= max(0, len(text) - 42) // 12
+            return score
+
+        preferred_summary = ""
+
+        one_liner_sections = [name for name in section_lines if "一句话版" in name]
+        for sec in one_liner_sections:
+            for item in section_lines.get(sec, []):
+                if 16 <= len(item) <= 88:
+                    preferred_summary = item
+                    break
+            if preferred_summary:
+                break
+
+        if not preferred_summary:
+            ranked = sorted(
+                [x for x in assistant_lines + bullet_points if 18 <= len(x) <= 88 and not seems_meta(x)],
+                key=score_summary,
+                reverse=True,
+            )
+            if ranked:
+                preferred_summary = ranked[0]
+
+        if not preferred_summary and assistant_lines:
+            preferred_summary = max(assistant_lines, key=score_summary)[:88]
+
+        if not preferred_summary:
+            return "昨日节奏平稳，暂无可展示的小记。"
+
+        detail_points = []
+        seen = {preferred_summary}
+        process_prefixes = ("我先把", "我把", "继续", "读完给你", "先给你", "我先给你")
+
+        preferred_detail_pool = []
+        for sec_name in ["文章想表达的重点", "核心摘要"]:
+            for actual_name, items in section_lines.items():
+                if sec_name in actual_name:
+                    preferred_detail_pool.extend(items)
+
+        candidate_pool = preferred_detail_pool + assistant_lines + bullet_points
+        for candidate in candidate_pool:
+            candidate = candidate.strip()
+            if not candidate or candidate in seen:
+                continue
+            if seems_meta(candidate):
+                continue
+            if candidate.startswith(process_prefixes):
+                continue
+            if len(candidate) > 42:
+                candidate = candidate[:39] + "..."
+            if len(candidate) < 8:
+                continue
+            detail_points.append(candidate)
+            seen.add(candidate)
+            if len(detail_points) >= 2:
+                break
+
+        result = [preferred_summary]
+        for point in detail_points:
+            result.append(f"· {point}")
 
         return "\n".join(result).strip()
 
     except Exception as e:
         print(f"extract_memo_from_file failed: {e}")
-        return "「昨日记录加载失败」\n\n「往者不可谏，来者犹可追。」"
+        return "昨日记录暂时加载失败。"

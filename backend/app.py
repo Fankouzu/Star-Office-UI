@@ -1257,15 +1257,19 @@ def get_yesterday_memo():
         else:
             # 如果昨天没有，找最近的一天
             if os.path.exists(MEMORY_DIR):
-                files = [f for f in os.listdir(MEMORY_DIR) if f.endswith(".md") and re.match(r"\d{4}-\d{2}-\d{2}\.md", f)]
+                files = [
+                    f for f in os.listdir(MEMORY_DIR)
+                    if f.endswith(".md") and re.match(r"\d{4}-\d{2}-\d{2}(?:-.+)?\.md$", f)
+                ]
                 if files:
                     files.sort(reverse=True)
-                    # 跳过今天的（如果存在）
+                    # 跳过今天的（如果存在），同时兼容 YYYY-MM-DD-*.md
                     today_str = datetime.now().strftime("%Y-%m-%d")
                     for f in files:
-                        if f != f"{today_str}.md":
+                        if not (f == f"{today_str}.md" or f.startswith(f"{today_str}-")):
                             target_file = os.path.join(MEMORY_DIR, f)
-                            target_date = f.replace(".md", "")
+                            m = re.match(r"(\d{4}-\d{2}-\d{2})", f)
+                            target_date = m.group(1) if m else f.replace(".md", "")
                             break
         
         if target_file and os.path.exists(target_file):
